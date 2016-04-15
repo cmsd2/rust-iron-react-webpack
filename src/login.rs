@@ -9,7 +9,7 @@ use oven::prelude::*;
 use persistent;
 use cookie::Cookie;
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct LoginManager {
     signing_key: Vec<u8>,
     /// Configuration for this manager
