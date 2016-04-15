@@ -1,0 +1,5 @@
+-u bdd
+--recursive
+--full-trace
+--reporter spec
+--require babel-core/register
