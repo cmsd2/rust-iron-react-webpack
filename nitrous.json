@@ -1,0 +1,10 @@
+{
+  "template": "rust",
+  "ports": [3000, 8080],
+  "name": "Example rust iron webapp with react and webpack",
+  "description": "Example webapp using Rust + Iron + React + Webpack",
+  "scripts": {
+    "post-create": "cargo build && cd web && sed -i 's/localhost/0.0.0.0/g' server.js && echo 'running npm install - this might take awhile...' && npm install",
+    "Start Rust Iron React Webpack": "cd ~/code/rust-iron-react-webpack && cargo run & cd web && npm start"
+  }
+}
