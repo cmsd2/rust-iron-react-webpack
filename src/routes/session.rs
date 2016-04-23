@@ -9,8 +9,12 @@ use rustc_serialize::{json, base64};
 use rustc_serialize::base64::ToBase64;
 use iron::prelude::*;
 use iron::status;
+use iron::middleware::{BeforeMiddleware};
+use iron::typemap::Key;
 use oven::prelude::*;
 use persistent;
+use plugin;
+use plugin::Extensible;
 
 use result::*;
 use login::*;
@@ -217,6 +221,38 @@ impl SessionController {
             self.sessions.remove(&session_id)
         } else {
             Ok(false)
+        }
+    }
+}
+
+impl Key for UserSession { type Value = Option<UserSession>; }
+
+impl<'a, 'b> plugin::Plugin<Request<'a, 'b>> for UserSession {
+    type Error = AppError;
+    
+    fn eval(req: &mut Request) -> Result<Option<UserSession>> {
+        debug!("getting session from middleware chain");
+        req.extensions().get::<UserSession>().ok_or(AppError::NoSessionLoaded).map(|s| s.to_owned())
+    }
+}
+
+impl BeforeMiddleware for SessionController {
+    fn before(&self, req: &mut Request) -> IronResult<()> {
+        match self.load_session(req) {
+            Ok(login) => {
+                debug!("injecting session into middleware chain {:?}", login);
+                req.extensions_mut().insert::<UserSession>(login.session);
+                Ok(())
+            },
+            Err(AppError::PersistenceError(persistent::PersistentError::NotFound)) => {
+                debug!("no session found");
+                req.extensions_mut().insert::<UserSession>(None);
+                Ok(())
+            }
+            Err(e) => {
+                req.extensions_mut().insert::<UserSession>(None);
+                Err(IronError::from(AppError::from(e)))
+            }
         }
     }
 }

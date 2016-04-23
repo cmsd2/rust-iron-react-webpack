@@ -10,6 +10,7 @@ extern crate rand;
 extern crate persistent;
 extern crate oven;
 extern crate cookie;
+extern crate plugin;
 
 pub mod routes;
 pub mod result;
@@ -61,6 +62,9 @@ fn main() {
     mount.mount("/api", router);
     
     let mut chain = Chain::new(mount);
+    chain.link_before(sessions_controller);
+    
+    chain = Chain::new(chain);
     chain.around(login_manager);
     chain.link_before(logger_before);
     chain.link_after(logger_after);

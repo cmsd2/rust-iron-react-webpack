@@ -46,6 +46,11 @@ quick_error! {
             display("error persisting state")
             cause(err)
         }
+        
+        NoSessionLoaded {
+            description("server session middleware not available")
+            display("server session middleware not available")
+        }
     }
 }
 
